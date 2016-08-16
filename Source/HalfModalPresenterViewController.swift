@@ -38,7 +38,7 @@ public class HalfModalPresenter {
         containerViewController.view.addSubview(dismissHitBox!)
         self.dismissHitBox!.addGestureRecognizer(gesture!)
         
-        let center = transitionView.center
+        let center = transitionView.superview!.convertPoint(transitionView.center, toView: nil)
         if var expandedPanel = expandedPanel as? OpenedView,
             let delegate = containerViewController as? ContainerView {
             expandedPanel.closer = delegate
@@ -98,7 +98,7 @@ public class HalfModalPresenter {
         if let expandedPanel = expandedPanel {
             let originalCenter = expandedPanel.center
             
-            let center = transitionView.center
+            let center = transitionView.superview!.convertPoint(transitionView.center, toView: nil)
             
             UIView.animateWithDuration(0.5, animations: {
                 self.bubble!.transform = CGAffineTransformMakeScale(0.001, 0.001)
