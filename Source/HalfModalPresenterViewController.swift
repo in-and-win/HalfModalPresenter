@@ -16,25 +16,31 @@ public protocol ContainerView {
     func close()
 }
 
-public class HalfModalPresenterViewController:UIViewController {
+public class HalfModalPresenter {
+    private let transitionView:UIView
+    
+    private let containerViewController:UIViewController
+    
     private var bubble:UIView?
     private var expandedPanel:UIView?
-    private var transitionView:UIView?
-    
     private var gesture:UITapGestureRecognizer?
     private var dismissHitBox:UIView?
     
-    public func presentHalfScreenView(expandedPanel: UIView, transitionView: UIView){
-        self.gesture = UITapGestureRecognizer(target: self, action: #selector(HalfModalPresenterViewController.dismissHalfScreenView))
-        dismissHitBox = UIView(frame: self.view.frame)
-        self.view.addSubview(dismissHitBox!)
+    public init(transitionView: UIView, containerViewController: UIViewController){
+        self.transitionView = transitionView
+        self.containerViewController = containerViewController
+    }
+    
+    public func presentHalfScreenView(expandedPanel: UIView){
+        self.expandedPanel = expandedPanel
+        self.gesture = UITapGestureRecognizer(target: self, action: #selector(HalfModalPresenter.dismissHalfScreenView))
+        dismissHitBox = UIView(frame: containerViewController.view.frame)
+        containerViewController.view.addSubview(dismissHitBox!)
         self.dismissHitBox!.addGestureRecognizer(gesture!)
         
-        self.transitionView = transitionView
-        self.expandedPanel = expandedPanel
         let center = transitionView.center
         if var expandedPanel = expandedPanel as? OpenedView,
-            let delegate = self as? ContainerView {
+            let delegate = containerViewController as? ContainerView {
             expandedPanel.closer = delegate
         }
         let screenHeight = UIScreen.mainScreen().bounds.height
@@ -52,20 +58,22 @@ public class HalfModalPresenterViewController:UIViewController {
             bubble.transform = CGAffineTransformMakeScale(0.001, 0.001)
             bubble.backgroundColor = transitionView.backgroundColor
             bubble.clipsToBounds = true
-            self.view.addSubview(bubble)
+            self.containerViewController.view.insertSubview(self.bubble!, belowSubview: expandedPanel)
         }
         
         expandedPanel.center = center
         expandedPanel.transform = CGAffineTransformMakeScale(0.001, 0.001)
         expandedPanel.alpha = 0
-        self.view.addSubview(expandedPanel)
+        containerViewController.view.addSubview(expandedPanel)
         
         UIView.animateWithDuration(0.5, animations: {
             self.bubble!.transform = CGAffineTransformIdentity
             self.bubble!.frame = CGRectMake(-screenHeight/4, screenHeight/2, screenWidth+screenHeight/2, screenHeight/2)
-            expandedPanel.transform = CGAffineTransformIdentity
-            expandedPanel.alpha = 1
-            expandedPanel.center = originalCenter
+            if let expandedPanel = self.expandedPanel {
+                expandedPanel.transform = CGAffineTransformIdentity
+                expandedPanel.alpha = 1
+                expandedPanel.center = originalCenter
+            }
         }) { (_) in
         }
     }
@@ -79,31 +87,31 @@ public class HalfModalPresenterViewController:UIViewController {
         return CGRect(origin: CGPointZero, size: size)
     }
     
+    @objc
     public func dismissHalfScreenView() {
-        if let returningControllerView = expandedPanel,
-            let transitionView = transitionView{
-            if let gesture = self.gesture,
-                let dismissHitBox = self.dismissHitBox{
-                dismissHitBox.removeGestureRecognizer(gesture)
-                dismissHitBox.removeFromSuperview()
-                self.gesture = nil
-            }
-            let originalCenter = returningControllerView.center
+        if let gesture = self.gesture,
+            let dismissHitBox = self.dismissHitBox{
+            dismissHitBox.removeGestureRecognizer(gesture)
+            dismissHitBox.removeFromSuperview()
+            self.gesture = nil
+        }
+        if let expandedPanel = expandedPanel {
+            let originalCenter = expandedPanel.center
             
             let center = transitionView.center
             
             UIView.animateWithDuration(0.5, animations: {
                 self.bubble!.transform = CGAffineTransformMakeScale(0.001, 0.001)
                 self.bubble!.center = center
-                returningControllerView.transform = CGAffineTransformMakeScale(0.001, 0.001)
-                returningControllerView.center = center
-                returningControllerView.alpha = 0
+                expandedPanel.transform = CGAffineTransformMakeScale(0.001, 0.001)
+                expandedPanel.center = center
+                expandedPanel.alpha = 0
                 
-                self.view.insertSubview(returningControllerView, belowSubview: returningControllerView)
-                self.view.insertSubview(self.bubble!, belowSubview: returningControllerView)
+                self.containerViewController.view.insertSubview(expandedPanel, belowSubview: expandedPanel)
+                self.containerViewController.view.insertSubview(self.bubble!, belowSubview: expandedPanel)
             }) { (_) in
-                returningControllerView.center = originalCenter;
-                returningControllerView.removeFromSuperview()
+                expandedPanel.center = originalCenter;
+                expandedPanel.removeFromSuperview()
                 self.bubble!.removeFromSuperview()
                 self.bubble = nil
             }
