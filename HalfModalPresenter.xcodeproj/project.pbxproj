@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		47EB1A701D621B8A00F19906 /* HalfModalPresenter.h in Headers */ = {isa = PBXBuildFile; fileRef = 47EB1A6F1D621B8A00F19906 /* HalfModalPresenter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		47EB1A7E1D62221600F19906 /* HalfModalPresenterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47EB1A7D1D62221600F19906 /* HalfModalPresenterViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		47EB1A6C1D621B8A00F19906 /* HalfModalPresenter.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = HalfModalPresenter.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		47EB1A6F1D621B8A00F19906 /* HalfModalPresenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HalfModalPresenter.h; sourceTree = "<group>"; };
 		47EB1A711D621B8A00F19906 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		47EB1A7B1D6220B300F19906 /* HalfModalPresenter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HalfModalPresenter.h; sourceTree = "<group>"; };
+		47EB1A7D1D62221600F19906 /* HalfModalPresenterViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = HalfModalPresenterViewController.swift; path = Source/HalfModalPresenterViewController.swift; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -46,10 +47,19 @@
 		47EB1A6E1D621B8A00F19906 /* HalfModalPresenter */ = {
 			isa = PBXGroup;
 			children = (
-				47EB1A6F1D621B8A00F19906 /* HalfModalPresenter.h */,
-				47EB1A711D621B8A00F19906 /* Info.plist */,
+				47EB1A7B1D6220B300F19906 /* HalfModalPresenter.h */,
+				47EB1A7D1D62221600F19906 /* HalfModalPresenterViewController.swift */,
+				47EB1A7C1D62214800F19906 /* Supporting Files */,
 			);
 			path = HalfModalPresenter;
+			sourceTree = "<group>";
+		};
+		47EB1A7C1D62214800F19906 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				47EB1A711D621B8A00F19906 /* Info.plist */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -59,7 +69,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				47EB1A701D621B8A00F19906 /* HalfModalPresenter.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,6 +139,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47EB1A7E1D62221600F19906 /* HalfModalPresenterViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,28 +240,33 @@
 		47EB1A751D621B8A00F19906 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = HalfModalPresenter/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.inandwin.HalfModalPresenter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
 		47EB1A761D621B8A00F19906 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = HalfModalPresenter/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.inandwin.HalfModalPresenter;
 				PRODUCT_NAME = "$(TARGET_NAME)";
