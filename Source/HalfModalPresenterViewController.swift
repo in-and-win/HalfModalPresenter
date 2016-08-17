@@ -73,9 +73,9 @@ public class HalfModalPresenter {
         let futureHeight = transitionViewFrame.height / 1.30
         let futureWidth = transitionViewFrame.width / 1.30
         
-        var anim1: CABasicAnimation = CABasicAnimation(keyPath: "cornerRadius")
+        let anim1: CABasicAnimation = CABasicAnimation(keyPath: "cornerRadius")
         anim1.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
-        anim1.fromValue = Int(30.0)
+        anim1.fromValue = Int(self.transitionView.frame.height/2)
         anim1.toValue = Int(futureHeight/2)
         anim1.duration = 0.1/animationSpeed
         
@@ -92,7 +92,7 @@ public class HalfModalPresenter {
                     constraint.constant = futureWidth
                 }
                 if constraint.firstAttribute == .Bottom {
-                    constraint.constant = constraint.constant + 0.02*screenHeight + futureHeight - transitionViewFrame.height
+                    constraint.constant = constraint.constant + 0.02*screenHeight - futureHeight + transitionViewFrame.height
                 }
             }
             for constraint in self.transitionView.superview!.constraints {
@@ -101,6 +101,7 @@ public class HalfModalPresenter {
                 }
             }
             self.transitionView.frame = CGRectMake(futureX, futureY, futureWidth, futureHeight)
+            self.transitionView.layoutIfNeeded()
         }) { (_) in
             self.createBubbleAnimation(self.transitionView.frame,toFrame: self.bubble!.frame, expandedPanelFrame: CGRectMake(0, screenHeight/2, screenWidth, screenHeight/2),completionBlock: nil)
         }
@@ -172,51 +173,48 @@ public class HalfModalPresenter {
             dismissHitBox.removeFromSuperview()
             self.gesture = nil
         }
-        if let expandedPanel = expandedPanel {
-            let originalCenter = expandedPanel.center
+        let center = transitionView.superview!.convertPoint(transitionView.center, toView: nil)
+        
+        self.createBubbleAnimation(self.bubble!.frame,toFrame: self.transitionView.frame, expandedPanelFrame: CGRectMake(center.x, center.y, 0, 0)){
+            self.bubble?.removeFromSuperview()
+            self.bubble = nil
+            let screenHeight = UIScreen.mainScreen().bounds.height
+            let transitionViewFrame = self.transitionView.frame
+            let futureY = transitionViewFrame.origin.y - screenHeight * 0.02
+            let futureX = transitionViewFrame.origin.x
+            let futureHeight = transitionViewFrame.height * 1.30
+            let futureWidth = transitionViewFrame.width * 1.30
             
-            let center = transitionView.superview!.convertPoint(transitionView.center, toView: nil)
+            let anim1: CABasicAnimation = CABasicAnimation(keyPath: "cornerRadius")
+            anim1.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
+            anim1.fromValue = Int(transitionViewFrame.height/2)
+            anim1.toValue = Int(futureHeight/2)
+            anim1.duration = 0.1/self.animationSpeed
             
-            self.createBubbleAnimation(self.bubble!.frame,toFrame: self.transitionView.frame, expandedPanelFrame: CGRectMake(center.x, center.y, 0, 0)){
-                self.bubble?.removeFromSuperview()
-                self.bubble = nil
-                let screenHeight = UIScreen.mainScreen().bounds.height
-                let transitionViewFrame = self.transitionView.frame
-                let futureY = transitionViewFrame.origin.y - screenHeight * 0.02
-                let futureX = transitionViewFrame.origin.x
-                let futureHeight = transitionViewFrame.height * 1.30
-                let futureWidth = transitionViewFrame.width * 1.30
-                
-                var anim1: CABasicAnimation = CABasicAnimation(keyPath: "cornerRadius")
-                anim1.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionLinear)
-                anim1.fromValue = Int(transitionViewFrame.height/2)
-                anim1.toValue = Int(futureHeight/2)
-                anim1.duration = 0.1/self.animationSpeed
-                
-                CATransaction.begin()
-                CATransaction.setDisableActions(true)
-                self.transitionView.layer.addAnimation(anim1, forKey: "cornerRadius")
-                CATransaction.commit()
-                UIView.animateWithDuration(0.1/self.animationSpeed, animations: {
-                    for constraint in self.transitionView.constraints {
-                        if constraint.firstAttribute == .Height {
-                            constraint.constant = futureHeight
-                        }
-                        if constraint.firstAttribute == .Width {
-                            constraint.constant = futureWidth
-                        }
-                        if constraint.firstAttribute == .Bottom {
-                            constraint.constant = constraint.constant - 0.02*screenHeight + futureHeight - transitionViewFrame.height
-                        }
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
+            self.transitionView.layer.addAnimation(anim1, forKey: "cornerRadius")
+            CATransaction.commit()
+            UIView.animateWithDuration(0.1/self.animationSpeed, animations: {
+                for constraint in self.transitionView.constraints {
+                    if constraint.firstAttribute == .Height {
+                        constraint.constant = futureHeight
                     }
-                    for constraint in self.transitionView.superview!.constraints {
-                        if let secondItem = constraint.secondItem as? UIView where secondItem == self.transitionView && constraint.firstAttribute == .Top {
-                            constraint.constant = constraint.constant - 0.02*screenHeight - futureHeight + transitionViewFrame.height
-                        }
+                    if constraint.firstAttribute == .Width {
+                        constraint.constant = futureWidth
                     }
-                    self.transitionView.frame = CGRectMake(futureX, futureY, futureWidth, futureHeight)
-                }) { (_) in
+                    if constraint.firstAttribute == .Bottom {
+                        constraint.constant = constraint.constant - 0.02*screenHeight - futureHeight + transitionViewFrame.height
+                    }
                 }
+                for constraint in self.transitionView.superview!.constraints {
+                    if let secondItem = constraint.secondItem as? UIView where secondItem == self.transitionView && constraint.firstAttribute == .Top {
+                        constraint.constant = constraint.constant - 0.02*screenHeight - futureHeight + transitionViewFrame.height
+                    }
+                }
+                self.transitionView.frame = CGRectMake(futureX, futureY, futureWidth, futureHeight)
+                self.transitionView.layoutIfNeeded()
+            }) { (_) in
             }
         }
     }
