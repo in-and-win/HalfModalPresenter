@@ -14,6 +14,7 @@ public protocol OpenedView {
 
 public protocol ContainerView {
     func close()
+    func isClosing()
 }
 
 public class HalfModalPresenter {
@@ -173,6 +174,9 @@ public class HalfModalPresenter {
             dismissHitBox.removeFromSuperview()
             self.gesture = nil
         }
+        if let containerView = containerViewController as? ContainerView {
+            containerView.isClosing()
+        }
         let center = transitionView.superview!.convertPoint(transitionView.center, toView: nil)
         
         self.createBubbleAnimation(self.bubble!.frame,toFrame: self.transitionView.frame, expandedPanelFrame: CGRectMake(center.x, center.y, 0, 0)){
@@ -215,6 +219,9 @@ public class HalfModalPresenter {
                 self.transitionView.frame = CGRectMake(futureX, futureY, futureWidth, futureHeight)
                 self.transitionView.layoutIfNeeded()
             }) { (_) in
+            }
+            if let expandedPanel = self.expandedPanel {
+                expandedPanel.removeFromSuperview()
             }
         }
     }
