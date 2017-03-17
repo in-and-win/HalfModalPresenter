@@ -17,17 +17,17 @@ public protocol ContainerView {
     func isClosing()
 }
 
-public class HalfModalPresenter {
-    private let transitionView:UIView
+open class HalfModalPresenter {
+    fileprivate let transitionView:UIView
     
-    private let containerViewController:UIViewController
+    fileprivate let containerViewController:UIViewController
     
-    private var bubble:UIImageView?
-    private var expandedPanel:UIView?
-    private var gesture:UITapGestureRecognizer?
-    private var dismissHitBox:UIView?
-    private var baseTransitionViewFrame:CGRect?
-    private let animationSpeed:Double = 1
+    fileprivate var bubble:UIImageView?
+    fileprivate var expandedPanel:UIView?
+    fileprivate var gesture:UITapGestureRecognizer?
+    fileprivate var dismissHitBox:UIView?
+    fileprivate var baseTransitionViewFrame:CGRect?
+    fileprivate let animationSpeed:Double = 1
     
     public init(transitionView: UIView, containerViewController: UIViewController){
         self.transitionView = transitionView
@@ -35,7 +35,7 @@ public class HalfModalPresenter {
         self.baseTransitionViewFrame = transitionView.frame
     }
     
-    public func presentHalfScreenView(expandedPanel: UIView, background: UIImage?){
+    open func presentHalfScreenView(_ expandedPanel: UIView, background: UIImage?){
         self.expandedPanel = expandedPanel
         self.gesture = UITapGestureRecognizer(target: self, action: #selector(HalfModalPresenter.dismissHalfScreenView))
         dismissHitBox = UIView(frame: containerViewController.view.frame)
@@ -46,8 +46,8 @@ public class HalfModalPresenter {
             let delegate = containerViewController as? ContainerView {
             expandedPanel.closer = delegate
         }
-        let screenHeight = UIScreen.mainScreen().bounds.height
-        let screenWidth = UIScreen.mainScreen().bounds.width
+        let screenHeight = UIScreen.main.bounds.height
+        let screenWidth = UIScreen.main.bounds.width
         
         
         bubble = UIImageView()
@@ -56,12 +56,12 @@ public class HalfModalPresenter {
             if let background = background {
                 bubble.image = background
             }
-            bubble.frame = CGRectMake(-screenHeight/4, screenHeight/2, screenWidth+screenHeight/2, screenHeight/2)
+            bubble.frame = CGRect(x: -screenHeight/4, y: screenHeight/2, width: screenWidth+screenHeight/2, height: screenHeight/2)
             bubble.layer.cornerRadius = bubble.frame.size.height / 2
-            bubble.hidden = true
+            bubble.isHidden = true
             self.containerViewController.view.insertSubview(bubble, belowSubview: expandedPanel)
         }
-        let maskContent = self.createCAShapeLayer(self.expandedPanel!, frame: CGRectZero, containerFrame: CGRectZero)
+        let maskContent = self.createCAShapeLayer(self.expandedPanel!, frame: CGRect.zero, containerFrame: CGRect.zero)
         self.expandedPanel!.layer.mask = maskContent
         
         expandedPanel.clipsToBounds = true
@@ -82,40 +82,40 @@ public class HalfModalPresenter {
         
         CATransaction.begin()
         CATransaction.setDisableActions(true)
-        self.transitionView.layer.addAnimation(anim1, forKey: "cornerRadius")
+        self.transitionView.layer.add(anim1, forKey: "cornerRadius")
         CATransaction.commit()
-        UIView.animateWithDuration(0.1/animationSpeed, animations: {
+        UIView.animate(withDuration: 0.1/animationSpeed, animations: {
             for constraint in self.transitionView.constraints {
-                if constraint.firstAttribute == .Height {
+                if constraint.firstAttribute == .height {
                     constraint.constant = futureHeight
                 }
-                if constraint.firstAttribute == .Width {
+                if constraint.firstAttribute == .width {
                     constraint.constant = futureWidth
                 }
-                if constraint.firstAttribute == .Bottom {
+                if constraint.firstAttribute == .bottom {
                     constraint.constant = constraint.constant + 0.02*screenHeight - futureHeight + transitionViewFrame.height
                 }
             }
             for constraint in self.transitionView.superview!.constraints {
-                if let secondItem = constraint.secondItem as? UIView where secondItem == self.transitionView && constraint.firstAttribute == .Top {
+                if let secondItem = constraint.secondItem as? UIView, secondItem == self.transitionView && constraint.firstAttribute == .top {
                     constraint.constant = constraint.constant + 0.02*screenHeight - futureHeight + transitionViewFrame.height
                 }
             }
-            self.transitionView.frame = CGRectMake(futureX, futureY, futureWidth, futureHeight)
+            self.transitionView.frame = CGRect(x: futureX, y: futureY, width: futureWidth, height: futureHeight)
             self.transitionView.layoutIfNeeded()
-        }) { (_) in
+        }, completion: { (_) in
             self.createBubbleAnimation(self.transitionView.frame,toFrame: self.bubble!.frame, contentMask: maskContent,completionBlock: nil)
-        }
+        }) 
     }
     
-    private func createBubbleAnimation(fromFrame: CGRect, toFrame: CGRect, contentMask: CAShapeLayer, completionBlock: (() -> Void)?){
-        self.bubble!.hidden = false
+    fileprivate func createBubbleAnimation(_ fromFrame: CGRect, toFrame: CGRect, contentMask: CAShapeLayer, completionBlock: (() -> Void)?){
+        self.bubble!.isHidden = false
         let mask = self.createCAShapeLayer(self.bubble!, frame: fromFrame, containerFrame: self.bubble!.frame)
         self.bubble!.layer.mask = mask
         
         // define your new path to animate the mask layer to
-        let path: UIBezierPath = UIBezierPath(roundedRect: CGRectMake(toFrame.origin.x - self.bubble!.frame.origin.x, toFrame.origin.y - self.bubble!.frame.origin.y, toFrame.size.width, toFrame.size.height), cornerRadius: min(toFrame.size.width, toFrame.size.height))
-        let contentPath: UIBezierPath = UIBezierPath(roundedRect: CGRectMake(toFrame.origin.x - self.bubble!.frame.origin.x, toFrame.origin.y - self.bubble!.frame.origin.y, toFrame.size.width, toFrame.size.height), cornerRadius: min(toFrame.size.width, toFrame.size.height))
+        let path: UIBezierPath = UIBezierPath(roundedRect: CGRect(x: toFrame.origin.x - self.bubble!.frame.origin.x, y: toFrame.origin.y - self.bubble!.frame.origin.y, width: toFrame.size.width, height: toFrame.size.height), cornerRadius: min(toFrame.size.width, toFrame.size.height))
+        let contentPath: UIBezierPath = UIBezierPath(roundedRect: CGRect(x: toFrame.origin.x - self.bubble!.frame.origin.x, y: toFrame.origin.y - self.bubble!.frame.origin.y, width: toFrame.size.width, height: toFrame.size.height), cornerRadius: min(toFrame.size.width, toFrame.size.height))
         
         // create new animation
         let animContent = CABasicAnimation(keyPath: "path")
@@ -126,8 +126,8 @@ public class HalfModalPresenter {
         anim.fromValue = mask.path
         
         // to value is the new path
-        animContent.toValue = contentPath.CGPath
-        anim.toValue = path.CGPath
+        animContent.toValue = contentPath.cgPath
+        anim.toValue = path.cgPath
         
         // duration of your animation
         animContent.duration = 0.4/self.animationSpeed
@@ -143,36 +143,36 @@ public class HalfModalPresenter {
         CATransaction.setCompletionBlock(completionBlock)
         CATransaction.setDisableActions(true)
         // add animation
-        mask.addAnimation(anim, forKey: nil)
-        mask.path = path.CGPath
-        contentMask.addAnimation(anim, forKey: nil)
-        contentMask.path = contentPath.CGPath
+        mask.add(anim, forKey: nil)
+        mask.path = path.cgPath
+        contentMask.add(anim, forKey: nil)
+        contentMask.path = contentPath.cgPath
         CATransaction.commit()
     }
     
-    private func createCAShapeLayer(imageView: UIView, frame: CGRect, containerFrame: CGRect) -> CAShapeLayer{
+    fileprivate func createCAShapeLayer(_ imageView: UIView, frame: CGRect, containerFrame: CGRect) -> CAShapeLayer{
         let circle: CAShapeLayer = CAShapeLayer(layer: imageView.layer)
         // Make a circular shape
-        let circularPath: UIBezierPath = UIBezierPath(roundedRect: CGRectMake(frame.origin.x - containerFrame.origin.x, frame.origin.y - containerFrame.origin.y, frame.size.width, frame.size.height), cornerRadius: min(frame.size.width, frame.size.height))
-        circle.path = circularPath.CGPath
+        let circularPath: UIBezierPath = UIBezierPath(roundedRect: CGRect(x: frame.origin.x - containerFrame.origin.x, y: frame.origin.y - containerFrame.origin.y, width: frame.size.width, height: frame.size.height), cornerRadius: min(frame.size.width, frame.size.height))
+        circle.path = circularPath.cgPath
         // Configure the apperence of the circle
-        circle.fillColor = UIColor.blackColor().CGColor
-        circle.strokeColor = UIColor.blackColor().CGColor
+        circle.fillColor = UIColor.black.cgColor
+        circle.strokeColor = UIColor.black.cgColor
         circle.lineWidth = 0
         return circle
     }
     
-    private func frameForBubble(originalCenter: CGPoint, size originalSize: CGSize, start: CGPoint) -> CGRect {
+    fileprivate func frameForBubble(_ originalCenter: CGPoint, size originalSize: CGSize, start: CGPoint) -> CGRect {
         let lengthX = fmax(start.x, originalSize.width - start.x);
         let lengthY = fmax(start.y, originalSize.height - start.y)
         let offset = sqrt(lengthX * lengthX + lengthY * lengthY) * 2;
         let size = CGSize(width: offset, height: offset)
         
-        return CGRect(origin: CGPointZero, size: size)
+        return CGRect(origin: CGPoint.zero, size: size)
     }
     
     @objc
-    public func dismissHalfScreenView() {
+    open func dismissHalfScreenView() {
         if let gesture = self.gesture,
             let dismissHitBox = self.dismissHitBox{
             dismissHitBox.removeGestureRecognizer(gesture)
@@ -182,11 +182,11 @@ public class HalfModalPresenter {
         if let containerView = containerViewController as? ContainerView {
             containerView.isClosing()
         }
-        let screenHeight = UIScreen.mainScreen().bounds.height
-        let screenWidth = UIScreen.mainScreen().bounds.width
-        let center = transitionView.superview!.convertPoint(transitionView.center, toView: nil)
+        let screenHeight = UIScreen.main.bounds.height
+        let screenWidth = UIScreen.main.bounds.width
+        let center = transitionView.superview!.convert(transitionView.center, to: nil)
         
-        let maskContent = self.createCAShapeLayer(self.expandedPanel!, frame: CGRectMake(0, screenHeight/2, screenWidth, screenHeight/2), containerFrame: CGRectMake(center.x, center.y, 0, 0))
+        let maskContent = self.createCAShapeLayer(self.expandedPanel!, frame: CGRect(x: 0, y: screenHeight/2, width: screenWidth, height: screenHeight/2), containerFrame: CGRect(x: center.x, y: center.y, width: 0, height: 0))
         self.expandedPanel!.layer.mask = maskContent
         self.createBubbleAnimation(self.bubble!.frame,toFrame: self.transitionView.frame, contentMask: maskContent){
             self.bubble?.removeFromSuperview()
@@ -205,29 +205,29 @@ public class HalfModalPresenter {
             
             CATransaction.begin()
             CATransaction.setDisableActions(true)
-            self.transitionView.layer.addAnimation(anim1, forKey: "cornerRadius")
+            self.transitionView.layer.add(anim1, forKey: "cornerRadius")
             CATransaction.commit()
-            UIView.animateWithDuration(0.1/self.animationSpeed, animations: {
+            UIView.animate(withDuration: 0.1/self.animationSpeed, animations: {
                 for constraint in self.transitionView.constraints {
-                    if constraint.firstAttribute == .Height {
+                    if constraint.firstAttribute == .height {
                         constraint.constant = futureHeight
                     }
-                    if constraint.firstAttribute == .Width {
+                    if constraint.firstAttribute == .width {
                         constraint.constant = futureWidth
                     }
-                    if constraint.firstAttribute == .Bottom {
+                    if constraint.firstAttribute == .bottom {
                         constraint.constant = constraint.constant - 0.02*screenHeight - futureHeight + transitionViewFrame.height
                     }
                 }
                 for constraint in self.transitionView.superview!.constraints {
-                    if let secondItem = constraint.secondItem as? UIView where secondItem == self.transitionView && constraint.firstAttribute == .Top {
+                    if let secondItem = constraint.secondItem as? UIView, secondItem == self.transitionView && constraint.firstAttribute == .top {
                         constraint.constant = constraint.constant - 0.02*screenHeight - futureHeight + transitionViewFrame.height
                     }
                 }
-                self.transitionView.frame = CGRectMake(futureX, futureY, futureWidth, futureHeight)
+                self.transitionView.frame = CGRect(x: futureX, y: futureY, width: futureWidth, height: futureHeight)
                 self.transitionView.layoutIfNeeded()
-            }) { (_) in
-            }
+            }, completion: { (_) in
+            }) 
             if let expandedPanel = self.expandedPanel {
                 expandedPanel.removeFromSuperview()
             }
